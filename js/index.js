@@ -1,20 +1,20 @@
 "use strict";
-let searchedByNameUsers = [];
-let orderedUsers = [];
-let searchedByLocationUsers = [];
+let listUserContainer = document.querySelector('#grid-user-container');
+let allFilteredUsers = [];
+let filterUsersByLocation = [];
+let usersSearchedByName= [];
+let filteredUsersByCreationDate = [];
 let filteredBios = [];
-let filteredUsers = [];
-let filteredUsersArray = [];
+let userNames = [];
 
-let usersNames = [];
+let orderUsersValue = '';
+let nameToSearch = '';
+
 let inputSearchUser;
 let orderUsers;
 let filterLocationUsers;
 let filterBio;
-let nameToSearch;
-
 let userCard;
-let listUserContainer;
 
 window.addEventListener("load", async () => {
   getFilterElements()
@@ -31,6 +31,7 @@ const getFilterElements = () => {
 
 const handleFilterUsers = () => {
   window.addEventListener("input", searchGithubUserByName);
+  window.addEventListener("change", filterGithubUserByCreationDate);
 }
 
 const fetchGithubUsers = async () =>{
@@ -43,60 +44,55 @@ const fetchGithubUsers = async () =>{
   
   json.map(username => {
     const { login } = username;
-    return usersNames.push(login);
+    return userNames.push(login);
   });
   
-  usersNames.map(async user => {
+  userNames.map(async user => {
     const res = await fetch(`${URL}/${user}`);
-    let json = await res.json()
+    const userJson = await res.json()
     .then(async data => await data)
     .catch(err => console.log(err));
-    filteredUsers.push(json);
-    return createUserCard(json)
-    
-  })
+    allFilteredUsers.push(userJson);
+    return createUserCard(userJson)
+  });
 }
 
-  const createUserCard = (user) => {
-    const {login, name, avatar_url, created_at, location, bio} = user;
-    listUserContainer = document.querySelector('.grid-user-container')
-    let cardFiltered = document.getElementById(login);
-    
-    if(cardFiltered === null){
-      const userData = {
-        picture: document.createElement('img'),
-        name: document.createElement('p'),
-        creationDate: document.createElement('p'),
-        location: document.createElement('p'),
-        bio: document.createElement('p')
-      }
-      userCard = document.createElement('li');
-      for (const data in userData) {
-        userCard.appendChild(userData[data])
-      }
-      userCard.setAttribute('id', login)
-      userData.picture.setAttribute('src', avatar_url)
-      userData.name.textContent = name;
-      userData.creationDate.textContent = created_at;
-      userData.location.textContent = location;
-      userData.bio.textContent = bio;
-      listUserContainer.appendChild(userCard);
-    }else{
-      listUserContainer.removeChild(cardFiltered);
-    }
+const createUserCard = (user) => {
+  const {login, name, avatar_url, created_at, location, bio} = user;
+  let userCardInit = "<ul class='user-card'>";
+  let userCard = 
+    `<li id="${login}" class="user">
+      <img src='${avatar_url}' alt="${name}" class="avatar">
+      <p>${name}</p>
+      <p>${created_at}</p>
+      <p>${location}</p>
+      <p>${bio}</p>
+    </li>`
+    userCardInit += userCard;
+    listUserContainer.innerHTML += userCardInit;
 }
 
 const removeAccentsAndSpaces = (nameToSearch) => {
   return nameToSearch.normalize("NFD").replace(/[^a-zA-Zs]/g, "");
 }
 
-const searchGithubUserByName = (event) => {
-  nameToSearch = removeAccentsAndSpaces(event.target.value);
-  filterUsers()
+const formatDate = (date) => {
+  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 }
 
-const filterUsers = () => {
-  let filtered = []
-  filtered = filteredUsers.filter(user => user.login.includes(nameToSearch)).map(itm => createUserCard(itm));
-  return filtered
+const searchGithubUserByName = (event) => {
+  listUserContainer.innerHTML = ''
+  nameToSearch = removeAccentsAndSpaces(event.target.value);
+  usersSearchedByName = allFilteredUsers
+    .filter(user => user.name !== null 
+      ? user.name.toLowerCase().includes(nameToSearch) 
+      : user.login.includes(nameToSearch))
+    .map(user => createUserCard(user));
+}
+
+const filterGithubUserByCreationDate = () => {
+  orderUsersValue = orderUsers.value;
+  filteredUsersByCreationDate = usersSearchedByName
+    .sort((a, b) => a.created_at > b.created_at)
+    .map(user => createUserCard(user));
 }
