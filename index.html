@@ -8,10 +8,28 @@
 </head>
 <body>
   <main>
-    <section>
-      <article class="input-filter" >
-        <input type="text" class="input-search-user">
+    <section class="search-user-container">
+      <article class="input-search-container" >
+        <input type="text" class="input-search-user" placeholder="Buscar o nome do usuário">
       </article>
+      <article class="user-filters" >
+        <select name="order" id="order-users" class="select-order">
+          <option value="order" hidden>Reordenar</option>
+          <option value="new-users">Usuários mais novos</option>
+          <option value="old-users">Usuários mais antigos</option>
+        </select>
+        <select name="location" id="order-users" class="select-location">
+          <option value="location" hidden>Local</option>
+          <option value="RJ">Rio de janeiro</option>
+          <option value="SP">São Paulo</option>
+        </select>
+        <label for="bio">
+          Selecionar usuários com bio?
+          <input type="checkbox" name="users-bio" id="bio">
+        </label>
+      </article>
+    </section>
+    <section class="show-users">
       <article class="user-container">
         <ul class="grid-user-container"></ul>
       </article>
