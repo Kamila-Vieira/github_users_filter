@@ -3,7 +3,9 @@ let searchedByNameUsers = [];
 let orderedUsers = [];
 let searchedByLocationUsers = [];
 let filteredBios = [];
-let filteredNames = [];
+let filteredUsers = [];
+let filteredUsersArray = [];
+
 let usersNames = [];
 let inputSearchUser;
 let orderUsers;
@@ -11,10 +13,12 @@ let filterLocationUsers;
 let filterBio;
 let nameToSearch;
 
+let userCard;
+let listUserContainer;
 
 window.addEventListener("load", async () => {
   getFilterElements()
-  await fetchAllGithubUsers();
+  await fetchGithubUsers();
   window.addEventListener("input", searchGithubUserByName);
 });
 
@@ -25,57 +29,70 @@ const getFilterElements = () => {
   filterBio = document.querySelector('#input-filter-bio');
 }
 
-const fetchAllGithubUsers = async () =>{
+const fetchGithubUsers = async () =>{
   const URL = `https://api.github.com/users`
   const response = await fetch(URL);
-  const json = await response.json().then(async data => await data);
+  //http://localhost:3000/users
+  const json = await response.json()
+    .then(async data => await data)
+    .catch(err => console.log(err));
+    
+    json.map(username => {
+      const { login } = username;
+      return usersNames.push(login);
+    });
+
+    usersNames.map(async user => {
+      const res = await fetch(`${URL}/${user}`);
+      let json = await res.json()
+        .then(async data => await data)
+        .catch(err => console.log(err));
+      filteredUsers.push(json);
+      return createUserCard(json)
+      
+    })
+  }
   
-  return json.map(user => {
-    const { login } = user;
-    return usersNames.push(login);
-  })
-}
-
-const fetchGithubUserData = async (user) =>{
-  const response = await fetch(`https://api.github.com/users/${user}`);
-  const json = await response.json().then(async data => await data);
-  const { name, avatar_url, created_at, location, bio} = json;
-  return createUserCard(name, avatar_url, created_at, location, bio);
-}
-
-const createUserCard = (name, picture, created, location, bio) => {
-  const listUserContainer = document.querySelector('.grid-user-container');
-  const userCard = document.createElement('li');
-  const newUser = {
-    picture: document.createElement('img'),
-    name: document.createElement('p'),
-    creationDate: document.createElement('p'),
-    location: document.createElement('p'),
-    bio: document.createElement('p')
-  }
-  for (const data in newUser) {
-    userCard.appendChild(newUser[data])
-  }
-  newUser.picture.setAttribute('src', picture)
-  newUser.name.textContent = name;
-  newUser.creationDate.textContent = created;
-  newUser.location.textContent = location;
-  newUser.bio.textContent = bio;
-  listUserContainer.appendChild(userCard);
+  const createUserCard = (user) => {
+    const {login, name, avatar_url, created_at, location, bio} = user;
+    listUserContainer = document.querySelector('.grid-user-container')
+    let cardFiltered = document.getElementById(login);
+    if(cardFiltered === null){
+      const userData = {
+        picture: document.createElement('img'),
+        name: document.createElement('p'),
+        creationDate: document.createElement('p'),
+        location: document.createElement('p'),
+        bio: document.createElement('p')
+      }
+      userCard = document.createElement('li');
+      for (const data in userData) {
+        userCard.appendChild(userData[data])
+      }
+      userCard.setAttribute('id', login)
+      userData.picture.setAttribute('src', avatar_url)
+      userData.name.textContent = name;
+      userData.creationDate.textContent = created_at;
+      userData.location.textContent = location;
+      userData.bio.textContent = bio;
+      listUserContainer.appendChild(userCard);
+    }
+    if(cardFiltered !== null){
+      listUserContainer.removeChild(cardFiltered);
+    }
 }
 
 const removeAccentsAndSpaces = (nameToSearch) => {
   return nameToSearch.normalize("NFD").replace(/[^a-zA-Zs]/g, "");
 }
 
-
 const searchGithubUserByName = (event) => {
   nameToSearch = removeAccentsAndSpaces(event.target.value);
-  filterUsers();
+  filterUsers()
 }
 
 const filterUsers = () => {
-  filteredNames = usersNames.filter(name => name.includes(nameToSearch));
-  return filteredNames.map(name => fetchGithubUserData(name));
+  let filtered = []
+  filtered = filteredUsers.filter(user => user.login.includes(nameToSearch));
+  return filtered.map(itm => createUserCard(itm))
 }
-console.log(filteredNames)

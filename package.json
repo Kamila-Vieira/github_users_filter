@@ -1,0 +1,20 @@
+{
+  "name": "teste_grama.cc",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "json-server --watch backend/db.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kamila-Vieira/teste_grama.cc.git"
+  },
+  "author": "Kamila Vieira da Silva Almeida",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kamila-Vieira/teste_grama.cc/issues"
+  },
+  "homepage": "https://github.com/Kamila-Vieira/teste_grama.cc#readme",
+  "description": ""
+}
