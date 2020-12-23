@@ -19,7 +19,7 @@ let listUserContainer;
 window.addEventListener("load", async () => {
   getFilterElements()
   await fetchGithubUsers();
-  window.addEventListener("input", searchGithubUserByName);
+  handleFilterUsers();
 });
 
 const getFilterElements = () => {
@@ -29,34 +29,39 @@ const getFilterElements = () => {
   filterBio = document.querySelector('#input-filter-bio');
 }
 
+const handleFilterUsers = () => {
+  window.addEventListener("input", searchGithubUserByName);
+}
+
 const fetchGithubUsers = async () =>{
   const URL = `https://api.github.com/users`
   const response = await fetch(URL);
   //http://localhost:3000/users
   const json = await response.json()
+  .then(async data => await data)
+  .catch(err => console.log(err));
+  
+  json.map(username => {
+    const { login } = username;
+    return usersNames.push(login);
+  });
+  
+  usersNames.map(async user => {
+    const res = await fetch(`${URL}/${user}`);
+    let json = await res.json()
     .then(async data => await data)
     .catch(err => console.log(err));
+    filteredUsers.push(json);
+    return createUserCard(json)
     
-    json.map(username => {
-      const { login } = username;
-      return usersNames.push(login);
-    });
+  })
+}
 
-    usersNames.map(async user => {
-      const res = await fetch(`${URL}/${user}`);
-      let json = await res.json()
-        .then(async data => await data)
-        .catch(err => console.log(err));
-      filteredUsers.push(json);
-      return createUserCard(json)
-      
-    })
-  }
-  
   const createUserCard = (user) => {
     const {login, name, avatar_url, created_at, location, bio} = user;
     listUserContainer = document.querySelector('.grid-user-container')
     let cardFiltered = document.getElementById(login);
+    
     if(cardFiltered === null){
       const userData = {
         picture: document.createElement('img'),
@@ -76,8 +81,7 @@ const fetchGithubUsers = async () =>{
       userData.location.textContent = location;
       userData.bio.textContent = bio;
       listUserContainer.appendChild(userCard);
-    }
-    if(cardFiltered !== null){
+    }else{
       listUserContainer.removeChild(cardFiltered);
     }
 }
@@ -93,6 +97,6 @@ const searchGithubUserByName = (event) => {
 
 const filterUsers = () => {
   let filtered = []
-  filtered = filteredUsers.filter(user => user.login.includes(nameToSearch));
-  return filtered.map(itm => createUserCard(itm))
+  filtered = filteredUsers.filter(user => user.login.includes(nameToSearch)).map(itm => createUserCard(itm));
+  return filtered
 }
