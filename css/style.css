@@ -1,4 +1,4 @@
-.grid {
+.grid-user-container {
   display: grid;
   grid-template-columns: repeat(3, 200px);
 }
