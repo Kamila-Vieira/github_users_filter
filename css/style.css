@@ -1,5 +1,24 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 #grid-user-container {
   display: grid;
   grid-template-columns: repeat(3, 500px);
+  margin: 0 auto;
+}
+.user-card {
+  list-style: none;
+  margin: 10px;
+  border: 1px solid #000;
+}
+.user {
+  padding: 30px;
   text-align: center;
+}
+.user-avatar {
+  width: 10rem;
+  border-radius: 50%;
 }

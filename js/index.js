@@ -11,7 +11,7 @@ let filteredBios = [];
 let orderUsersValue = '';
 let orderLocationUsersValue = '';
 let nameToSearch = '';
-let hasBio = false;
+let hasBio;
 
 let inputSearchUser;
 let orderUsers;
@@ -79,8 +79,8 @@ const createUserCard = (user) => {
   createLocationOption(allFilteredUsers)
 }
 //Remove acentos e espaços da string
-const removeAccentsAndSpaces = (name) => {
-  return name.normalize("NFD").replace(/[^a-zA-Zs]/g, "");
+const removeAccentsAndSpacesLowerCase = (name) => {
+  return name.normalize("NFD").replace(/[^a-zA-Zs]/g, "").toLowerCase();
 }
 //Formata a data para o padrão brasileiro
 const formatDate = (date) => {
@@ -88,7 +88,7 @@ const formatDate = (date) => {
 }
 //Função que chama o filtro por nome
 const searchGithubUserByName = (event) => {
-  nameToSearch = removeAccentsAndSpaces(event.target.value);
+  nameToSearch = removeAccentsAndSpacesLowerCase(event.target.value);
   filterUsers();
 }
 //Função que chama o filtro por data
@@ -98,12 +98,12 @@ const filterGithubUserByCreationDate = (event) => {
 }
 //Função que chama o filtro por localização
 const filterGithubUserByLocation = (event) => {
-  orderLocationUsersValue = event.target.value;
+  orderLocationUsersValue = removeAccentsAndSpacesLowerCase(event.target.value);
   filterUsers();
 }
 //Função que chama o filtro por usuários com ou sem bio
 const filterGithubUserByBio = () => {
-  !hasBio ? hasBio = true : hasBio = false;
+  hasBio ? hasBio = false : hasBio = true;
   filterUsers();
 }
 //Permite o filtro de usuários sobre outros filtros ou nenhum filtro
@@ -122,25 +122,30 @@ const filterUsers = () => {
     ? usersSearchedByName.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
     : usersSearchedByName.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
   //Filtra usuários pela localização
-  filteredUsersByLocation = filteredUsersByCreationDate.filter(user => {
-    let { location } = user
-    location !== null ? location : location = 'Sem localização';
-    return removeAccentsAndSpaces(location).includes(orderLocationUsersValue)
-  });
-  filteredBios = filteredUsersByLocation.filter(user => hasBio ? user.bio !== null : user.bio === null)
+  if(orderLocationUsersValue !== 'todos'){
+    filteredUsersByLocation = filteredUsersByCreationDate.filter(user => {
+      let { location } = user
+      location !== null ? location : location = 'Sem localização';
+      return removeAccentsAndSpacesLowerCase(location).includes(orderLocationUsersValue)
+    });
+  }else{
+    filteredUsersByLocation = filteredUsersByCreationDate;
+  }
+  filteredBios = filteredUsersByLocation.filter(user => hasBio ? user.bio !== null : user.bio === null);
   filteredBios.map(user => createUserCard(user));
 }
 //Cria automaticamento opções de localização com base nas localizações disponíveis na API
 const createLocationOption = (obj) => {
   filterLocationUsers.innerHTML = ''
-  usersLocation = obj.map(user => user.location)
+  usersLocation = obj.map(user => user.location);
   let hiddenOption = `<option value="hidden-location" hidden>Local</option>`
   filterLocationUsers.innerHTML = hiddenOption;
+  usersLocation.unshift('Todos');
   return usersLocation
-    .filter((l, i) => usersLocation.indexOf(l) === i)
-    .filter(location=> {
+  .filter((l, i) => usersLocation.indexOf(l) === i)
+  .filter(location=> {
       location !== null ? location : location = 'Sem localização';
-      let locationOption = `<option value="${removeAccentsAndSpaces(location)}">${location}</option>`
+      let locationOption = `<option value="${removeAccentsAndSpacesLowerCase(location)}">${location}</option>`
       return filterLocationUsers.innerHTML += locationOption;
   });
 }
