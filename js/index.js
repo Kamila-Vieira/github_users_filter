@@ -11,7 +11,7 @@ let filteredBios = [];
 let orderUsersValue = '';
 let orderLocationUsersValue = '';
 let nameToSearch = '';
-let hasBio = true;
+let hasBio = false;
 
 let inputSearchUser;
 let orderUsers;
