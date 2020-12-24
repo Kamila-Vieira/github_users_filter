@@ -4,13 +4,14 @@ let userNames = [];
 let allFilteredUsers = [];
 let usersSearchedByName= [];
 let filteredUsersByCreationDate = [];
-let filteredUsersByLocation = [];
 let usersLocation = [];
+let filteredUsersByLocation = [];
 let filteredBios = [];
 
 let orderUsersValue = '';
 let orderLocationUsersValue = '';
 let nameToSearch = '';
+let hasBio = true;
 
 let inputSearchUser;
 let orderUsers;
@@ -56,8 +57,9 @@ const fetchGithubUsers = async () =>{
 //Função que aciona os eventos de pesquisa
 const handlerFilterUsers = () => {
   inputSearchUser.addEventListener("input", searchGithubUserByName);
-  orderUsers.addEventListener("change", filterGithubUserByCreationDate);
   filterLocationUsers.addEventListener("change", filterGithubUserByLocation);
+  orderUsers.addEventListener("change", filterGithubUserByCreationDate);
+  filterBio.addEventListener("click", filterGithubUserByBio);
 }
 //Remove acentos e espaços da string
 const createUserCard = (user) => {
@@ -99,13 +101,17 @@ const filterGithubUserByLocation = (event) => {
   orderLocationUsersValue = event.target.value;
   filterUsers();
 }
+//Função que chama o filtro por usuários com ou sem bio
+const filterGithubUserByBio = () => {
+  !hasBio ? hasBio = true : hasBio = false;
+  filterUsers();
+}
 //Permite o filtro de usuários sobre outros filtros ou nenhum filtro
 const filterUsers = () => {
   listUserContainer.innerHTML = ''
   //Busca de usuários pelo nome ou login (caso não tenha nome)
   usersSearchedByName = allFilteredUsers
   .filter(user => {
-    console.log(user)
       const { login, name } = user;
       let nameToFilter;
       name === null ? nameToFilter = login : nameToFilter = name;
@@ -117,12 +123,12 @@ const filterUsers = () => {
     : usersSearchedByName.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
   //Filtra usuários pela localização
   filteredUsersByLocation = filteredUsersByCreationDate.filter(user => {
-    let { location } = user;
+    let { location } = user
     location !== null ? location : location = 'Sem localização';
-    return orderLocationUsersValue === removeAccentsAndSpaces(location)
+    return removeAccentsAndSpaces(location).includes(orderLocationUsersValue)
   });
-  console.log(filteredUsersByLocation)
-  return filteredUsersByLocation.map(user => createUserCard(user));
+  filteredBios = filteredUsersByLocation.filter(user => hasBio ? user.bio !== null : user.bio === null)
+  filteredBios.map(user => createUserCard(user));
 }
 //Cria automaticamento opções de localização com base nas localizações disponíveis na API
 const createLocationOption = (obj) => {
