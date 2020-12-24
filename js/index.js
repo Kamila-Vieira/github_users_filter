@@ -1,39 +1,36 @@
 "use strict";
 let listUserContainer = document.querySelector('#grid-user-container');
+let userNames = [];
 let allFilteredUsers = [];
-let filterUsersByLocation = [];
 let usersSearchedByName= [];
 let filteredUsersByCreationDate = [];
+let filteredUsersByLocation = [];
+let usersLocation = [];
 let filteredBios = [];
-let userNames = [];
 
 let orderUsersValue = '';
+let orderLocationUsersValue = '';
 let nameToSearch = '';
 
 let inputSearchUser;
 let orderUsers;
 let filterLocationUsers;
 let filterBio;
-let userCard;
 
+//Evento inicial de carregamento
 window.addEventListener("load", async () => {
-  getFilterElements()
   await fetchGithubUsers();
-  handleFilterUsers();
+  getFilterElements();
+  handlerFilterUsers();
 });
-
+//Função que seleciona os elementos de filtro para serem utilizados posteriormente
 const getFilterElements = () => {
   inputSearchUser = document.querySelector('#input-search');
   orderUsers = document.querySelector('#order-users');
   filterLocationUsers = document.querySelector('#location-users');
   filterBio = document.querySelector('#input-filter-bio');
 }
-
-const handleFilterUsers = () => {
-  window.addEventListener("input", searchGithubUserByName);
-  window.addEventListener("change", filterGithubUserByCreationDate);
-}
-
+//Função que realização a requisição com a API
 const fetchGithubUsers = async () =>{
   const URL = `https://api.github.com/users`
   const response = await fetch(URL);
@@ -56,43 +53,88 @@ const fetchGithubUsers = async () =>{
     return createUserCard(userJson)
   });
 }
-
+//Função que aciona os eventos de pesquisa
+const handlerFilterUsers = () => {
+  inputSearchUser.addEventListener("input", searchGithubUserByName);
+  orderUsers.addEventListener("change", filterGithubUserByCreationDate);
+  filterLocationUsers.addEventListener("change", filterGithubUserByLocation);
+}
+//Remove acentos e espaços da string
 const createUserCard = (user) => {
   const {login, name, avatar_url, created_at, location, bio} = user;
-  let userCardInit = "<ul class='user-card'>";
+  let userCardInit = "<li class='user-card'>";
   let userCard = 
-    `<li id="${login}" class="user">
-      <img src='${avatar_url}' alt="${name}" class="avatar">
-      <p>${name}</p>
-      <p>${created_at}</p>
-      <p>${location}</p>
-      <p>${bio}</p>
+    `<div id="${login}" class="user">
+      <img src='${avatar_url}' alt="${name}" class="user-avatar">
+      <p class="user-name">${name === null ? login : name}</p>
+      <p class="user-date">${formatDate(new Date(created_at))}</p>
+      <p class="user-location">${location === null ? 'Sem localização' : location}</p>
+      <p class="user-bio">${bio === null ? 'Sem Bio' : bio}</p>
+    </div>
     </li>`
-    userCardInit += userCard;
-    listUserContainer.innerHTML += userCardInit;
+  userCardInit += userCard;
+  listUserContainer.innerHTML += userCardInit;
+  createLocationOption(allFilteredUsers)
 }
-
-const removeAccentsAndSpaces = (nameToSearch) => {
-  return nameToSearch.normalize("NFD").replace(/[^a-zA-Zs]/g, "");
+//Remove acentos e espaços da string
+const removeAccentsAndSpaces = (name) => {
+  return name.normalize("NFD").replace(/[^a-zA-Zs]/g, "");
 }
-
+//Formata a data para o padrão brasileiro
 const formatDate = (date) => {
-  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  return `${("00" + date.getDate()).slice(-2)}/${("00" + (date.getMonth() + 1)).slice(-2) }/${date.getFullYear()}`;
 }
-
+//Função que chama o filtro por nome
 const searchGithubUserByName = (event) => {
-  listUserContainer.innerHTML = ''
   nameToSearch = removeAccentsAndSpaces(event.target.value);
-  usersSearchedByName = allFilteredUsers
-    .filter(user => user.name !== null 
-      ? user.name.toLowerCase().includes(nameToSearch) 
-      : user.login.includes(nameToSearch))
-    .map(user => createUserCard(user));
+  filterUsers();
 }
-
-const filterGithubUserByCreationDate = () => {
-  orderUsersValue = orderUsers.value;
-  filteredUsersByCreationDate = usersSearchedByName
-    .sort((a, b) => a.created_at > b.created_at)
-    .map(user => createUserCard(user));
+//Função que chama o filtro por data
+const filterGithubUserByCreationDate = (event) => {
+  orderUsersValue = event.target.value;
+  filterUsers();
+}
+//Função que chama o filtro por localização
+const filterGithubUserByLocation = (event) => {
+  orderLocationUsersValue = event.target.value;
+  filterUsers();
+}
+//Permite o filtro de usuários sobre outros filtros ou nenhum filtro
+const filterUsers = () => {
+  listUserContainer.innerHTML = ''
+  //Busca de usuários pelo nome ou login (caso não tenha nome)
+  usersSearchedByName = allFilteredUsers
+  .filter(user => {
+    console.log(user)
+      const { login, name } = user;
+      let nameToFilter;
+      name === null ? nameToFilter = login : nameToFilter = name;
+      return nameToFilter.toLowerCase().includes(nameToSearch)
+    });
+  //Filtra usuários pela data
+  filteredUsersByCreationDate = (orderUsersValue === 'old-users'
+    ? usersSearchedByName.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    : usersSearchedByName.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+  //Filtra usuários pela localização
+  filteredUsersByLocation = filteredUsersByCreationDate.filter(user => {
+    let { location } = user;
+    location !== null ? location : location = 'Sem localização';
+    return orderLocationUsersValue === removeAccentsAndSpaces(location)
+  });
+  console.log(filteredUsersByLocation)
+  return filteredUsersByLocation.map(user => createUserCard(user));
+}
+//Cria automaticamento opções de localização com base nas localizações disponíveis na API
+const createLocationOption = (obj) => {
+  filterLocationUsers.innerHTML = ''
+  usersLocation = obj.map(user => user.location)
+  let hiddenOption = `<option value="hidden-location" hidden>Local</option>`
+  filterLocationUsers.innerHTML = hiddenOption;
+  return usersLocation
+    .filter((l, i) => usersLocation.indexOf(l) === i)
+    .filter(location=> {
+      location !== null ? location : location = 'Sem localização';
+      let locationOption = `<option value="${removeAccentsAndSpaces(location)}">${location}</option>`
+      return filterLocationUsers.innerHTML += locationOption;
+  });
 }
