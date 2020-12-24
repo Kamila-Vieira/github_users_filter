@@ -22,6 +22,7 @@ let filterBio;
 window.addEventListener("load", async () => {
   await fetchGithubUsers();
   getFilterElements();
+  inputSearchUser.focus()
   handlerFilterUsers();
 });
 //Função que seleciona os elementos de filtro para serem utilizados posteriormente
