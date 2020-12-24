@@ -116,8 +116,9 @@ const filterUsers = () => {
       const { login, name } = user;
       let nameToFilter;
       name === null ? nameToFilter = login : nameToFilter = name;
-      return nameToFilter.toLowerCase().includes(nameToSearch)
+      return removeAccentsAndSpacesLowerCase(nameToFilter).includes(nameToSearch)
     });
+    console.log(usersSearchedByName)
   //Filtra usuários pela data
   switch (orderUsersValue) {
     case 'old-users':
@@ -127,7 +128,7 @@ const filterUsers = () => {
       filteredUsersByCreationDate = usersSearchedByName.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       break;
     default:
-      filteredUsersByCreationDate = allFilteredUsers
+      filteredUsersByCreationDate = usersSearchedByName
       break;
   }
   //Filtra usuários pela localização
@@ -147,14 +148,14 @@ const filterUsers = () => {
 const createLocationOption = (obj) => {
   filterLocationUsers.innerHTML = ''
   usersLocation = obj.map(user => user.location);
-  let hiddenOption = `<option value="hidden-location" hidden>Local</option>`
+  let hiddenOption = `<option class="location-option" value="hidden-location" hidden>Local</option>`
   filterLocationUsers.innerHTML = hiddenOption;
   usersLocation.unshift('Todos');
   return usersLocation
   .filter((l, i) => usersLocation.indexOf(l) === i)
   .filter(location=> {
       location !== null ? location : location = 'Sem localização';
-      let locationOption = `<option value="${removeAccentsAndSpacesLowerCase(location)}">${location}</option>`
+      let locationOption = `<option class="location-option" value="${removeAccentsAndSpacesLowerCase(location)}">${location}</option>`
       return filterLocationUsers.innerHTML += locationOption;
   });
 }
