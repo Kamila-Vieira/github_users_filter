@@ -118,9 +118,17 @@ const filterUsers = () => {
       return nameToFilter.toLowerCase().includes(nameToSearch)
     });
   //Filtra usuários pela data
-  filteredUsersByCreationDate = (orderUsersValue === 'old-users'
-    ? usersSearchedByName.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-    : usersSearchedByName.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+  switch (orderUsersValue) {
+    case 'old-users':
+      filteredUsersByCreationDate = usersSearchedByName.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      break;
+    case 'new-users':
+      filteredUsersByCreationDate = usersSearchedByName.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      break;
+    default:
+      filteredUsersByCreationDate = allFilteredUsers
+      break;
+  }
   //Filtra usuários pela localização
   if(orderLocationUsersValue !== 'todos'){
     filteredUsersByLocation = filteredUsersByCreationDate.filter(user => {
