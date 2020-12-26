@@ -64,7 +64,7 @@ const handlerFilterUsers = () => {
   orderUsers.addEventListener("change", filterGithubUserByCreationDate);
   filterBio.addEventListener("click", filterGithubUserByBio);
 }
-//Remove acentos e espaços da string
+//Cria o card de cada usuário
 const createUserCard = (user) => {
   const {login, name, avatar_url, created_at, location, bio} = user;
   let userCardInit = "<li class='user-card'>";
@@ -79,7 +79,7 @@ const createUserCard = (user) => {
     </li>`
   userCardInit += userCard;
   listUserContainer.innerHTML += userCardInit;
-  createLocationOption(allFilteredUsers)
+  createLocationOption(allFilteredUsers);
 }
 //Remove acentos e espaços da string
 const removeAccentsAndSpacesLowerCase = (name) => {
@@ -111,26 +111,29 @@ const filterGithubUserByBio = () => {
 }
 //Permite o filtro de usuários sobre outros filtros ou nenhum filtro
 const filterUsers = () => {
-  listUserContainer.innerHTML = ''
+  listUserContainer.innerHTML = '';
   //Busca de usuários pelo nome ou login (caso não tenha nome)
   usersSearchedByName = allFilteredUsers
   .filter(user => {
       const { login, name } = user;
       let nameToFilter;
       name === null ? nameToFilter = login : nameToFilter = name;
-      return removeAccentsAndSpacesLowerCase(nameToFilter).includes(nameToSearch)
+      return removeAccentsAndSpacesLowerCase(nameToFilter)
+        .includes(nameToSearch)
     });
     console.log(usersSearchedByName)
   //Filtra usuários pela data
   switch (orderUsersValue) {
     case 'old-users':
-      filteredUsersByCreationDate = usersSearchedByName.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      filteredUsersByCreationDate = usersSearchedByName
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       break;
     case 'new-users':
-      filteredUsersByCreationDate = usersSearchedByName.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      filteredUsersByCreationDate = usersSearchedByName
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       break;
     default:
-      filteredUsersByCreationDate = usersSearchedByName
+      filteredUsersByCreationDate = usersSearchedByName;
       break;
   }
   //Filtra usuários pela localização
@@ -138,24 +141,26 @@ const filterUsers = () => {
     filteredUsersByLocation = filteredUsersByCreationDate.filter(user => {
       let { location } = user
       location !== null ? location : location = 'Sem localização';
-      return removeAccentsAndSpacesLowerCase(location).includes(orderLocationUsersValue)
+      return removeAccentsAndSpacesLowerCase(location)
+        .includes(orderLocationUsersValue)
     });
   }else{
     filteredUsersByLocation = filteredUsersByCreationDate;
   }
-  filteredBios = filteredUsersByLocation.filter(user => hasBio ? user.bio !== null : user.bio === null);
-  filteredBios.map(user => createUserCard(user));
+  filteredBios = filteredUsersByLocation
+    .filter(user => hasBio ? user.bio !== null : user.bio === null)
+    .map(user => createUserCard(user));
 }
-//Cria automaticamento opções de localização com base nas localizações disponíveis na API
-const createLocationOption = (obj) => {
-  filterLocationUsers.innerHTML = ''
-  usersLocation = obj.map(user => user.location);
+//Cria automaticamento opções de localização para o filtro de local com base nas disponíveis na API
+const createLocationOption = (users) => {
+  filterLocationUsers.innerHTML = '';
+  usersLocation = users.map(user => user.location);
   let hiddenOption = `<option class="location-option" value="hidden-location" hidden>Local</option>`
   filterLocationUsers.innerHTML = hiddenOption;
   usersLocation.unshift('Todos');
   return usersLocation
-  .filter((l, i) => usersLocation.indexOf(l) === i)
-  .filter(location=> {
+    .filter((l, i) => usersLocation.indexOf(l) === i)
+    .filter(location=> {
       location !== null ? location : location = 'Sem localização';
       let locationOption = `<option class="location-option" value="${removeAccentsAndSpacesLowerCase(location)}">${location}</option>`
       return filterLocationUsers.innerHTML += locationOption;
