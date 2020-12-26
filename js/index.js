@@ -1,5 +1,5 @@
 "use strict";
-let listUserContainer = document.querySelector('#grid-user-container');
+//Definição das variáveis
 let userNames = [];
 let allFilteredUsers = [];
 let usersSearchedByName= [];
@@ -13,6 +13,7 @@ let orderLocationUsersValue = '';
 let nameToSearch = '';
 let hasBio;
 
+let listUserContainer;
 let inputSearchUser;
 let orderUsers;
 let filterLocationUsers;
@@ -27,6 +28,7 @@ window.addEventListener("load", async () => {
 });
 //Função que seleciona os elementos de filtro para serem utilizados posteriormente
 const getFilterElements = () => {
+  listUserContainer = document.querySelector('#grid-user-container');
   inputSearchUser = document.querySelector('#input-search');
   orderUsers = document.querySelector('#order-users');
   filterLocationUsers = document.querySelector('#location-users');

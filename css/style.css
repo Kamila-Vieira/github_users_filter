@@ -5,8 +5,8 @@
   margin: 50px;
 }
 .input-search-container {
-  width: 1500px;
   padding: 20px 0;
+  width: 85vw;
 }
 .input-search-user {
   width: 100%;
@@ -20,24 +20,20 @@
 .select-order,
 .input-search-user,
 .checkbox-order-label {
-  font-size: 18px;
+  font-size: 20px;
   font-family: "Segoe UI", sans-serif;
   font-weight: bold;
 }
 .select-order {
   width: 37%;
   margin-right: 20px;
-  height: 30px;
+  height: 35px;
   font-size: 15px;
 }
-/* .location-option {
-  margin-bottom: 5200px;
-} */
 .checkbox-order-label {
-  font-size: 18px;
-  font-family: "Segoe UI", sans-serif;
-  font-weight: bold;
   margin: 0 20px;
+  display: flex;
+  align-items: center;
 }
 .checkbox-order {
   height: 30px;
@@ -45,37 +41,6 @@
   margin-left: 10px;
   position: relative;
 }
-.checkbox-order:checked {
-  opacity: 0;
-}
-.checkbox-order:checked + span::after,
-.checkbox-order:checked + span::before {
-  width: 100%;
-  width: 100%;
-}
-.checkbox-order:checked + span::before {
-  content: "";
-  border-right: solid 3px #000;
-  transform: rotate(-45deg);
-  top: 0;
-  bottom: 0;
-  right: 13.5px;
-  background-color: unset;
-}
-.checkbox-order:checked + span::after {
-  content: "";
-  border-left: solid 3px #000;
-  transform: rotate(45deg);
-  left: 13.5px;
-  top: 0;
-  bottom: 0;
-  background-color: #fff;
-}
-
-/* .checkbox-order:checked {
-  outline: none;
-} */
-
 .input-search-user,
 .select-order {
   padding-left: 20px;
@@ -83,7 +48,7 @@
 
 #grid-user-container {
   display: grid;
-  grid-template-columns: repeat(3, 500px);
+  grid-template-columns: repeat(3, 30vw);
   margin: 50px 0;
 }
 .user-card {
@@ -120,4 +85,37 @@
   width: 10rem;
   border-radius: 50%;
   margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .user-filters {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .input-search-container {
+    padding: 0;
+    margin-bottom: 20px;
+  }
+  .input-search-user {
+    width: 78vw;
+  }
+  .select-order {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .checkbox-order-label {
+    margin: 0;
+  }
+  .select-order,
+  .input-search-user,
+  .checkbox-order-label {
+    font-size: 15px;
+    font-family: "Segoe UI", sans-serif;
+    font-weight: bold;
+  }
+  #grid-user-container {
+    grid-template-columns: 90vw;
+    margin: 20px 0;
+  }
 }
